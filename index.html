@@ -2,126 +2,136 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Planner Treinos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planner Premium</title>
 
 <style>
 body{
   margin:0;
-  background:#0b0b0b;
-  font-family:'Segoe UI', sans-serif;
+  background:linear-gradient(180deg,#0b0b0b,#111);
+  font-family:-apple-system, BlinkMacSystemFont;
   color:#fff;
 }
 
-.container{
-  max-width:900px;
-  margin:auto;
-  padding:20px;
-}
+.container{padding:16px; max-width:900px; margin:auto;}
 
 .header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  display:flex; justify-content:space-between; align-items:center;
   margin-bottom:20px;
 }
 
-.stats{
-  font-size:13px;
-  color:#aaa;
+.card{
+  backdrop-filter: blur(12px);
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:18px;
+  margin-bottom:12px;
+  display:flex;
+  overflow:hidden;
+  transition:.2s;
 }
 
-.progress-bar{
+.card:hover{transform:scale(1.01);}
+
+.left{width:55%; padding:15px;}
+.right{width:45%; padding:15px; border-left:1px solid rgba(255,255,255,0.1);}
+
+.pill{
+  padding:5px 10px;
+  border-radius:20px;
+  font-size:12px;
+  margin:3px;
+  display:inline-block;
+}
+
+.gym{background:#dff5d5;color:#1b4d12;}
+.abs{background:#dbeeff;color:#1b4d66;}
+.run{background:#ffe9cc;color:#7a4d00;}
+.swim{background:#d9fff2;color:#00664d;}
+
+.checkbox{
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:8px;
+  cursor:pointer;
+}
+
+.checkbox input{display:none;}
+
+.custom{
+  width:18px; height:18px;
+  border-radius:6px;
+  border:2px solid #555;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:.2s;
+}
+
+input:checked + .custom{
+  background:#4caf50;
+  border-color:#4caf50;
+  transform:scale(1.1);
+}
+
+input:checked + .custom::after{
+  content:"✔";
+  color:#fff;
+  font-size:12px;
+}
+
+.progress{
   height:6px;
   background:#333;
   border-radius:10px;
   overflow:hidden;
-  margin-top:5px;
+  margin-top:8px;
 }
 
-.progress{
+.bar{
   height:100%;
   background:#4caf50;
   width:0%;
+  transition:.3s;
 }
 
-.day{
+.chart{
+  height:80px;
   display:flex;
-  border:1px solid #2a2a2a;
-  border-radius:14px;
-  margin-bottom:12px;
-  overflow:hidden;
-  background:#1a1a1a;
+  align-items:flex-end;
+  gap:4px;
+  margin-top:10px;
 }
 
-.left{
-  padding:15px;
-  width:55%;
-}
-
-.right{
-  padding:15px;
-  width:45%;
-  border-left:1px solid #2a2a2a;
-}
-
-h2{
-  margin:0 0 10px;
-  font-size:18px;
-}
-
-.tag{
-  font-size:11px;
-  padding:3px 8px;
-  border-radius:20px;
-  margin-left:8px;
-}
-
-.treino{ background:#dff5d5; color:#1b4d12;}
-.descanso{ background:#333; color:#aaa;}
-
-.pill{
-  display:inline-block;
-  padding:5px 10px;
-  border-radius:20px;
-  font-size:11px;
-  margin:3px 5px 0 0;
-}
-
-.gym{ background:#dff5d5; color:#1b4d12;}
-.abs{ background:#dbeeff; color:#1b4d66;}
-.run{ background:#ffe9cc; color:#7a4d00;}
-.swim{ background:#d9fff2; color:#00664d;}
-
-.checklist label{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-bottom:6px;
-  cursor:pointer;
-}
-
-input{
-  width:16px;
-  height:16px;
+.chart div{
+  width:10px;
+  background:#4caf50;
+  border-radius:3px;
 }
 
 .intense{
   border:2px solid #ff4500;
 }
+
 </style>
 </head>
 
 <body>
+
 <div class="container">
 
 <div class="header">
-  <h1>Minha semana</h1>
-  <div class="stats">
+  <div>
+    <h2>Minha semana</h2>
     <div id="score">0%</div>
-    <div id="streak">🔥 0</div>
-    <div class="progress-bar"><div class="progress" id="bar"></div></div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+  </div>
+  <div>
+    🔥 <span id="streak">0</span><br>
+    🏆 <span id="rank">-</span>
   </div>
 </div>
+
+<div id="chart" class="chart"></div>
 
 <div id="app"></div>
 
@@ -129,109 +139,91 @@ input{
 
 <script>
 
-const checklist = [
-"Multivitamínico",
-"Creatina",
-"Whey Leite",
-"Whey Carne",
-"3L Água"
-];
+const checklist=["Multivitamínico","Creatina","Whey Leite","Whey Carne","3L Água"];
 
-const days = [
-  {name:"Segunda", rest:true},
-  {name:"Terça", treino:[
-    {p:"Manhã", t:[["Academia","gym"]]},
-    {p:"Tarde", t:[["Abdômen","abs"]]}
-  ]},
-  {name:"Quarta", rest:true},
-  {name:"Quinta", treino:[
-    {p:"Tarde", t:[["Abdômen","abs"],["Academia","gym"]]},
-    {p:"Noite", t:[["Corrida 5km","run"]]}
-  ]},
-  {name:"Sexta", treino:[{p:"Dia", t:[["Academia","gym"]]}]},
-  {name:"Sábado", intense:true, treino:[
-    {p:"Manhã", t:[["Natação","swim"]]},
-    {p:"Noite", t:[["Corrida 10km+","run"]]}
-  ]},
-  {name:"Domingo", treino:[{p:"Dia", t:[["Academia","gym"]]}]}
-];
+const days=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
 
-const app = document.getElementById("app");
+const app=document.getElementById("app");
 
 function save(){
-  const data = {};
-  document.querySelectorAll("input").forEach(i=>{
-    data[i.id] = i.checked;
-  });
-  localStorage.setItem("planner", JSON.stringify(data));
+  const data={};
+  document.querySelectorAll("input").forEach(i=>data[i.id]=i.checked);
+  localStorage.setItem("planner",JSON.stringify(data));
   update();
 }
 
 function load(){
-  const data = JSON.parse(localStorage.getItem("planner")||"{}");
-  document.querySelectorAll("input").forEach(i=>{
-    i.checked = data[i.id] || false;
-  });
+  const data=JSON.parse(localStorage.getItem("planner")||"{}");
+  document.querySelectorAll("input").forEach(i=>i.checked=data[i.id]||false);
 }
 
 function update(){
-  const inputs = document.querySelectorAll("input");
-  let total = inputs.length;
-  let done = [...inputs].filter(i=>i.checked).length;
+  const inputs=document.querySelectorAll("input");
+  let total=inputs.length;
+  let done=[...inputs].filter(i=>i.checked).length;
+  let percent=Math.round((done/total)*100);
 
-  let percent = Math.round((done/total)*100);
-  document.getElementById("score").innerText = percent+"%";
-  document.getElementById("bar").style.width = percent+"%";
+  document.getElementById("score").innerText=percent+"%";
+  document.getElementById("bar").style.width=percent+"%";
 
-  let streak = 0;
-  days.forEach((d,i)=>{
-    let ok = checklist.every((_,j)=>{
-      let el = document.getElementById(`d${i}-${j}`);
-      return el && el.checked;
-    });
+  // streak
+  let streak=0;
+  for(let i=0;i<7;i++){
+    let ok=true;
+    for(let j=0;j<checklist.length;j++){
+      let el=document.getElementById(`d${i}-${j}`);
+      if(!el.checked) ok=false;
+    }
     if(ok) streak++;
-  });
+  }
+  document.getElementById("streak").innerText=streak;
 
-  document.getElementById("streak").innerText = "🔥 "+streak;
+  // ranking
+  let rank="Bronze";
+  if(percent>80) rank="Elite";
+  else if(percent>60) rank="Pro";
+  else if(percent>40) rank="Intermediário";
+  document.getElementById("rank").innerText=rank;
+
+  // gráfico
+  let chart=document.getElementById("chart");
+  chart.innerHTML="";
+  for(let i=0;i<7;i++){
+    let dayDone=0;
+    for(let j=0;j<checklist.length;j++){
+      if(document.getElementById(`d${i}-${j}`).checked) dayDone++;
+    }
+    let bar=document.createElement("div");
+    bar.style.height=(dayDone*15)+"px";
+    chart.appendChild(bar);
+  }
 }
 
-days.forEach((d,i)=>{
-  const div = document.createElement("div");
-  div.className = "day" + (d.intense ? " intense":"");
+for(let i=0;i<7;i++){
+  let card=document.createElement("div");
+  card.className="card"+(i==5?" intense":"");
 
-  let left = `<div class="left">
-    <h2>${d.name}
-      <span class="tag ${d.rest?"descanso":"treino"}">
-        ${d.rest?"Descanso":"Treino"}
-      </span>
-    </h2>`;
+  let left=`<div class="left">
+    <h3>${days[i]}</h3>
+    <span class="pill gym">Academia</span>
+  </div>`;
 
-  if(d.rest){
-    left += `<p style="color:#aaa">Recuperação</p>`;
-  } else {
-    d.treino.forEach(sec=>{
-      left += `<div><b>${sec.p}</b><br>`;
-      sec.t.forEach(t=>{
-        left += `<span class="pill ${t[1]}">${t[0]}</span>`;
-      });
-      left += `</div>`;
-    });
-  }
+  let right=`<div class="right">`;
 
-  left += "</div>";
-
-  let right = `<div class="right checklist">`;
   checklist.forEach((c,j)=>{
-    right += `<label>
+    right+=`
+    <label class="checkbox">
       <input type="checkbox" id="d${i}-${j}" onchange="save()">
+      <div class="custom"></div>
       ${c}
     </label>`;
   });
-  right += "</div>";
 
-  div.innerHTML = left + right;
-  app.appendChild(div);
-});
+  right+="</div>";
+
+  card.innerHTML=left+right;
+  app.appendChild(card);
+}
 
 load();
 update();
