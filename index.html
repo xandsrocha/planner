@@ -4,92 +4,123 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
 body{
   margin:0;
-  background:#0b0b0b;
-  font-family:-apple-system;
+  background:#050505;
+  font-family:'Inter', sans-serif;
   color:#fff;
 }
 
 .container{
-  max-width:900px;
+  max-width:1100px;
   margin:auto;
-  padding:20px;
+  padding:30px 20px;
 }
 
-h1{margin-bottom:5px;}
+/* HEADER */
 
-.header{
+.top{
   display:flex;
   justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:25px;
+}
+
+.title small{
+  color:#888;
+  font-size:12px;
+}
+
+.title h1{
+  margin:0;
+  font-size:34px;
+}
+
+.stats{
+  display:flex;
+  gap:30px;
   align-items:center;
 }
 
-.progress-bar{
-  height:6px;
-  background:#333;
-  border-radius:10px;
-  overflow:hidden;
-  margin-top:5px;
-  width:200px;
+.circle{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  border:6px solid #1f1f1f;
+  position:relative;
 }
 
-.progress{
-  height:100%;
-  background:#4caf50;
-  width:0%;
+.circle span{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:14px;
 }
+
+/* LEGEND */
+
+.legend{
+  display:flex;
+  gap:15px;
+  margin-bottom:15px;
+  font-size:13px;
+}
+
+.legend span{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.dot{
+  width:10px;
+  height:10px;
+  border-radius:2px;
+}
+
+/* CARD */
 
 .card{
   display:flex;
-  justify-content:space-between;
-  border-radius:18px;
-  margin-top:15px;
-  background:linear-gradient(145deg,#1a1a1a,#111);
-  border:1px solid #2a2a2a;
+  border-radius:20px;
+  margin-bottom:12px;
+  background:linear-gradient(145deg,#1b1b1b,#0f0f0f);
+  border:1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
   overflow:hidden;
 }
 
-.left{
-  width:45%;
-  padding:15px;
-}
-
-.middle{
-  width:25%;
-  padding:15px;
-  border-left:1px solid #2a2a2a;
-  border-right:1px solid #2a2a2a;
-}
-
-.right{
-  width:30%;
-  padding:15px;
-}
+.left{width:35%; padding:18px;}
+.middle{width:35%; padding:18px; border-left:1px solid rgba(255,255,255,0.08);}
+.right{width:30%; padding:18px; border-left:1px dashed rgba(255,255,255,0.2);}
 
 .day{
   font-size:20px;
-  font-weight:bold;
+  font-weight:600;
 }
 
 .tag{
-  display:inline-block;
+  background:#2c2c2c;
   padding:4px 10px;
   border-radius:20px;
-  font-size:12px;
+  font-size:11px;
   margin-left:10px;
 }
 
-.treino{background:#dff5d5;color:#1b4d12;}
-.descanso{background:#333;color:#aaa;}
+.desc{color:#888; margin-top:8px; font-size:13px;}
+
+.period{margin-top:10px; font-size:12px; color:#aaa;}
 
 .pill{
   display:inline-block;
   padding:6px 12px;
   border-radius:20px;
+  margin-top:6px;
   font-size:12px;
-  margin-top:8px;
 }
 
 .gym{background:#dff5d5;color:#1b4d12;}
@@ -97,28 +128,31 @@ h1{margin-bottom:5px;}
 .run{background:#ffe9cc;color:#7a4d00;}
 .swim{background:#d9fff2;color:#00664d;}
 
-.notes{
-  color:#aaa;
+.notes-title{
   font-size:12px;
+  color:#aaa;
+  margin-bottom:10px;
 }
 
-.notes-line{
+.line{
   height:1px;
   background:#333;
-  margin:6px 0;
+  margin-bottom:10px;
 }
 
-.checkbox{
+/* CHECK */
+
+.check{
   display:flex;
   align-items:center;
-  gap:8px;
-  margin-bottom:8px;
-  cursor:pointer;
+  gap:10px;
+  margin-bottom:10px;
+  font-size:13px;
 }
 
-.checkbox input{display:none;}
+.check input{display:none;}
 
-.custom{
+.box{
   width:18px;
   height:18px;
   border:2px solid #555;
@@ -126,21 +160,31 @@ h1{margin-bottom:5px;}
   display:flex;
   align-items:center;
   justify-content:center;
+  transition:.2s;
 }
 
-input:checked + .custom{
+input:checked + .box{
   background:#4caf50;
   border-color:#4caf50;
 }
 
-input:checked + .custom::after{
+input:checked + .box::after{
   content:"✔";
   color:#fff;
   font-size:12px;
 }
 
+/* SÁBADO */
+
 .intense{
   border:2px solid #ff4500;
+}
+
+.banner{
+  background:#ff4500;
+  padding:6px 15px;
+  font-size:12px;
+  font-weight:600;
 }
 </style>
 </head>
@@ -149,15 +193,24 @@ input:checked + .custom::after{
 
 <div class="container">
 
-<div class="header">
-  <div>
+<div class="top">
+  <div class="title">
+    <small>PLANNER DE TREINOS</small>
     <h1>Minha semana</h1>
-    <div id="percent">0%</div>
-    <div class="progress-bar"><div class="progress" id="bar"></div></div>
   </div>
-  <div>
-    🔥 <span id="streak">0</span>
+
+  <div class="stats">
+    <div class="circle"><span id="percent">0%</span></div>
+    <div>🔥 <span id="streak">0</span></div>
+    <div>📊 Histórico</div>
   </div>
+</div>
+
+<div class="legend">
+  <span><div class="dot" style="background:#4caf50"></div>Academia</span>
+  <span><div class="dot" style="background:#2196f3"></div>Abdômen</span>
+  <span><div class="dot" style="background:#ff9800"></div>Corrida</span>
+  <span><div class="dot" style="background:#00c853"></div>Natação</span>
 </div>
 
 <div id="app"></div>
@@ -176,12 +229,26 @@ const checklist=[
 
 const days=[
   {name:"Segunda",rest:true},
-  {name:"Terça",treino:["Academia","Abdômen"]},
+  {name:"Terça",treino:[
+    ["Manhã","Academia","gym"],
+    ["Tarde","Abdômen","abs"]
+  ]},
   {name:"Quarta",rest:true},
-  {name:"Quinta",treino:["Abdômen","Academia","Corrida 5km"]},
-  {name:"Sexta",treino:["Academia"]},
-  {name:"Sábado",treino:["Natação","Corrida 10km"],intense:true},
-  {name:"Domingo",treino:["Academia"]}
+  {name:"Quinta",treino:[
+    ["Tarde","Abdômen","abs"],
+    ["Tarde","Academia","gym"],
+    ["Noite","Corrida 5km","run"]
+  ]},
+  {name:"Sexta",treino:[
+    ["Dia","Academia","gym"]
+  ]},
+  {name:"Sábado",intense:true,treino:[
+    ["Manhã","Natação","swim"],
+    ["Noite","Corrida longa +10km","run"]
+  ]},
+  {name:"Domingo",treino:[
+    ["Dia","Academia","gym"]
+  ]}
 ];
 
 function save(){
@@ -203,7 +270,6 @@ function update(){
   let percent=Math.round((done/total)*100);
 
   document.getElementById("percent").innerText=percent+"%";
-  document.getElementById("bar").style.width=percent+"%";
 
   let streak=0;
   days.forEach((d,i)=>{
@@ -221,46 +287,48 @@ days.forEach((d,i)=>{
   card.className="card"+(d.intense?" intense":"");
 
   let left=`<div class="left">
-    <div class="day">${d.name}
-      <span class="tag ${d.rest?"descanso":"treino"}">
-        ${d.rest?"Descanso":"Treino"}
-      </span>
+    <div class="day">${d.name} 
+      <span class="tag">${d.rest?"DESCANSO":"TREINO"}</span>
     </div>`;
 
   if(d.rest){
-    left+=`<p style="color:#aaa">Recuperação</p>`;
+    left+=`<div class="desc">Recuperação e descanso ativo</div>`;
   } else{
     d.treino.forEach(t=>{
-      let cls="gym";
-      if(t.includes("Abd")) cls="abs";
-      if(t.includes("Corrida")) cls="run";
-      if(t.includes("Natação")) cls="swim";
-      left+=`<div class="pill ${cls}">${t}</div>`;
+      left+=`
+      <div class="period">${t[0]}</div>
+      <div class="pill ${t[2]}">${t[1]}</div>`;
     });
   }
 
   left+="</div>";
 
   let middle=`<div class="middle">
-    <div class="notes">ANOTAÇÕES</div>
-    <div class="notes-line"></div>
-    <div class="notes-line"></div>
+    <div class="notes-title">ANOTAÇÕES</div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="desc">Clique para adicionar</div>
   </div>`;
 
   let right=`<div class="right">`;
 
   checklist.forEach((c,j)=>{
     right+=`
-    <label class="checkbox">
+    <label class="check">
       <input type="checkbox" id="d${i}-${j}" onchange="save()">
-      <div class="custom"></div>
+      <div class="box"></div>
       ${c}
     </label>`;
   });
 
   right+="</div>";
 
-  card.innerHTML=left+middle+right;
+  if(d.intense){
+    card.innerHTML=`<div class="banner">🔥 SÁBADO — DIA MAIS INTENSO</div>`+left+middle+right;
+  }else{
+    card.innerHTML=left+middle+right;
+  }
+
   app.appendChild(card);
 });
 
