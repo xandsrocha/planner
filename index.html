@@ -3,45 +3,93 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Planner Premium</title>
 
 <style>
 body{
   margin:0;
-  background:linear-gradient(180deg,#0b0b0b,#111);
-  font-family:-apple-system, BlinkMacSystemFont;
+  background:#0b0b0b;
+  font-family:-apple-system;
   color:#fff;
 }
 
-.container{padding:16px; max-width:900px; margin:auto;}
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:20px;
+}
+
+h1{margin-bottom:5px;}
 
 .header{
-  display:flex; justify-content:space-between; align-items:center;
-  margin-bottom:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.progress-bar{
+  height:6px;
+  background:#333;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:5px;
+  width:200px;
+}
+
+.progress{
+  height:100%;
+  background:#4caf50;
+  width:0%;
 }
 
 .card{
-  backdrop-filter: blur(12px);
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:18px;
-  margin-bottom:12px;
   display:flex;
+  justify-content:space-between;
+  border-radius:18px;
+  margin-top:15px;
+  background:linear-gradient(145deg,#1a1a1a,#111);
+  border:1px solid #2a2a2a;
   overflow:hidden;
-  transition:.2s;
 }
 
-.card:hover{transform:scale(1.01);}
+.left{
+  width:45%;
+  padding:15px;
+}
 
-.left{width:55%; padding:15px;}
-.right{width:45%; padding:15px; border-left:1px solid rgba(255,255,255,0.1);}
+.middle{
+  width:25%;
+  padding:15px;
+  border-left:1px solid #2a2a2a;
+  border-right:1px solid #2a2a2a;
+}
 
-.pill{
-  padding:5px 10px;
+.right{
+  width:30%;
+  padding:15px;
+}
+
+.day{
+  font-size:20px;
+  font-weight:bold;
+}
+
+.tag{
+  display:inline-block;
+  padding:4px 10px;
   border-radius:20px;
   font-size:12px;
-  margin:3px;
+  margin-left:10px;
+}
+
+.treino{background:#dff5d5;color:#1b4d12;}
+.descanso{background:#333;color:#aaa;}
+
+.pill{
   display:inline-block;
+  padding:6px 12px;
+  border-radius:20px;
+  font-size:12px;
+  margin-top:8px;
 }
 
 .gym{background:#dff5d5;color:#1b4d12;}
@@ -49,8 +97,21 @@ body{
 .run{background:#ffe9cc;color:#7a4d00;}
 .swim{background:#d9fff2;color:#00664d;}
 
+.notes{
+  color:#aaa;
+  font-size:12px;
+}
+
+.notes-line{
+  height:1px;
+  background:#333;
+  margin:6px 0;
+}
+
 .checkbox{
-  display:flex; align-items:center; gap:8px;
+  display:flex;
+  align-items:center;
+  gap:8px;
   margin-bottom:8px;
   cursor:pointer;
 }
@@ -58,19 +119,18 @@ body{
 .checkbox input{display:none;}
 
 .custom{
-  width:18px; height:18px;
-  border-radius:6px;
+  width:18px;
+  height:18px;
   border:2px solid #555;
+  border-radius:4px;
   display:flex;
   align-items:center;
   justify-content:center;
-  transition:.2s;
 }
 
 input:checked + .custom{
   background:#4caf50;
   border-color:#4caf50;
-  transform:scale(1.1);
 }
 
 input:checked + .custom::after{
@@ -79,39 +139,9 @@ input:checked + .custom::after{
   font-size:12px;
 }
 
-.progress{
-  height:6px;
-  background:#333;
-  border-radius:10px;
-  overflow:hidden;
-  margin-top:8px;
-}
-
-.bar{
-  height:100%;
-  background:#4caf50;
-  width:0%;
-  transition:.3s;
-}
-
-.chart{
-  height:80px;
-  display:flex;
-  align-items:flex-end;
-  gap:4px;
-  margin-top:10px;
-}
-
-.chart div{
-  width:10px;
-  background:#4caf50;
-  border-radius:3px;
-}
-
 .intense{
   border:2px solid #ff4500;
 }
-
 </style>
 </head>
 
@@ -121,17 +151,14 @@ input:checked + .custom::after{
 
 <div class="header">
   <div>
-    <h2>Minha semana</h2>
-    <div id="score">0%</div>
-    <div class="progress"><div class="bar" id="bar"></div></div>
+    <h1>Minha semana</h1>
+    <div id="percent">0%</div>
+    <div class="progress-bar"><div class="progress" id="bar"></div></div>
   </div>
   <div>
-    🔥 <span id="streak">0</span><br>
-    🏆 <span id="rank">-</span>
+    🔥 <span id="streak">0</span>
   </div>
 </div>
-
-<div id="chart" class="chart"></div>
 
 <div id="app"></div>
 
@@ -139,11 +166,23 @@ input:checked + .custom::after{
 
 <script>
 
-const checklist=["Multivitamínico","Creatina","Whey Leite","Whey Carne","3L Água"];
+const checklist=[
+"Tomou Multi Vitamínico?",
+"Tomou Creatina?",
+"Tomou Whey Proteína Leite?",
+"Tomou Whey Proteína Carne?",
+"Tomou 3 Litros de água?"
+];
 
-const days=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
-
-const app=document.getElementById("app");
+const days=[
+  {name:"Segunda",rest:true},
+  {name:"Terça",treino:["Academia","Abdômen"]},
+  {name:"Quarta",rest:true},
+  {name:"Quinta",treino:["Abdômen","Academia","Corrida 5km"]},
+  {name:"Sexta",treino:["Academia"]},
+  {name:"Sábado",treino:["Natação","Corrida 10km"],intense:true},
+  {name:"Domingo",treino:["Academia"]}
+];
 
 function save(){
   const data={};
@@ -163,49 +202,49 @@ function update(){
   let done=[...inputs].filter(i=>i.checked).length;
   let percent=Math.round((done/total)*100);
 
-  document.getElementById("score").innerText=percent+"%";
+  document.getElementById("percent").innerText=percent+"%";
   document.getElementById("bar").style.width=percent+"%";
 
-  // streak
   let streak=0;
-  for(let i=0;i<7;i++){
-    let ok=true;
-    for(let j=0;j<checklist.length;j++){
-      let el=document.getElementById(`d${i}-${j}`);
-      if(!el.checked) ok=false;
-    }
+  days.forEach((d,i)=>{
+    let ok=checklist.every((_,j)=>document.getElementById(`d${i}-${j}`).checked);
     if(ok) streak++;
-  }
+  });
+
   document.getElementById("streak").innerText=streak;
-
-  // ranking
-  let rank="Bronze";
-  if(percent>80) rank="Elite";
-  else if(percent>60) rank="Pro";
-  else if(percent>40) rank="Intermediário";
-  document.getElementById("rank").innerText=rank;
-
-  // gráfico
-  let chart=document.getElementById("chart");
-  chart.innerHTML="";
-  for(let i=0;i<7;i++){
-    let dayDone=0;
-    for(let j=0;j<checklist.length;j++){
-      if(document.getElementById(`d${i}-${j}`).checked) dayDone++;
-    }
-    let bar=document.createElement("div");
-    bar.style.height=(dayDone*15)+"px";
-    chart.appendChild(bar);
-  }
 }
 
-for(let i=0;i<7;i++){
+const app=document.getElementById("app");
+
+days.forEach((d,i)=>{
   let card=document.createElement("div");
-  card.className="card"+(i==5?" intense":"");
+  card.className="card"+(d.intense?" intense":"");
 
   let left=`<div class="left">
-    <h3>${days[i]}</h3>
-    <span class="pill gym">Academia</span>
+    <div class="day">${d.name}
+      <span class="tag ${d.rest?"descanso":"treino"}">
+        ${d.rest?"Descanso":"Treino"}
+      </span>
+    </div>`;
+
+  if(d.rest){
+    left+=`<p style="color:#aaa">Recuperação</p>`;
+  } else{
+    d.treino.forEach(t=>{
+      let cls="gym";
+      if(t.includes("Abd")) cls="abs";
+      if(t.includes("Corrida")) cls="run";
+      if(t.includes("Natação")) cls="swim";
+      left+=`<div class="pill ${cls}">${t}</div>`;
+    });
+  }
+
+  left+="</div>";
+
+  let middle=`<div class="middle">
+    <div class="notes">ANOTAÇÕES</div>
+    <div class="notes-line"></div>
+    <div class="notes-line"></div>
   </div>`;
 
   let right=`<div class="right">`;
@@ -221,9 +260,9 @@ for(let i=0;i<7;i++){
 
   right+="</div>";
 
-  card.innerHTML=left+right;
+  card.innerHTML=left+middle+right;
   app.appendChild(card);
-}
+});
 
 load();
 update();
