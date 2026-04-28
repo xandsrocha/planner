@@ -30,6 +30,12 @@ body{
   color:#aaa;
 }
 
+.history{
+  margin-top:10px;
+  font-size:12px;
+  color:#ccc;
+}
+
 .day{
   display:flex;
   flex-wrap:wrap;
@@ -40,21 +46,14 @@ body{
   background:#1a1a1a;
 }
 
-.left{
+.left, .right{
   padding:15px;
   flex:1;
   min-width:250px;
 }
 
 .right{
-  padding:15px;
-  flex:1;
-  min-width:250px;
   border-left:1px solid #2a2a2a;
-}
-
-h2{
-  margin:0 0 10px 0;
 }
 
 .tag{
@@ -67,11 +66,6 @@ h2{
 .treino{ background:#dff5d5; color:#1b4d12;}
 .descanso{ background:#333; color:#aaa;}
 
-.label{
-  font-size:12px;
-  color:#aaa;
-}
-
 .pill{
   display:inline-block;
   padding:5px 10px;
@@ -80,39 +74,12 @@ h2{
   margin:3px 5px 0 0;
 }
 
-.gym{ background:#dff5d5; color:#1b4d12;}
-.abs{ background:#dbeeff; color:#1b4d66;}
-.run{ background:#ffe9cc; color:#7a4d00;}
-.swim{ background:#d9fff2; color:#00664d;}
+.gym{ background:#dff5d5;}
+.abs{ background:#dbeeff;}
+.run{ background:#ffe9cc;}
+.swim{ background:#d9fff2;}
 
-.notes{
-  border-top:1px solid #333;
-  margin-top:10px;
-  padding-top:10px;
-}
-
-.notes div{
-  height:1px;
-  background:#333;
-  margin:5px 0;
-}
-
-.checklist label{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-bottom:6px;
-  cursor:pointer;
-}
-
-input[type="checkbox"]{
-  width:16px;
-  height:16px;
-}
-
-.intense{
-  border:2px solid #ff4500;
-}
+input{ cursor:pointer; }
 
 .progress-bar{
   height:8px;
@@ -136,9 +103,10 @@ input[type="checkbox"]{
 <div class="header">
   <h1>Minha semana</h1>
   <div class="stats">
+    <div id="score">Score: 0%</div>
     <div id="streak">🔥 Streak: 0</div>
-    <div id="progressText">0%</div>
-    <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
+    <div class="progress-bar"><div class="progress" id="bar"></div></div>
+    <div class="history" id="history"></div>
   </div>
 </div>
 
@@ -148,13 +116,7 @@ input[type="checkbox"]{
 
 <script>
 
-const checklist = [
-"Multi Vitamínico",
-"Creatina",
-"Whey Leite",
-"Whey Carne",
-"3L Água"
-];
+const checklist = ["Multivitamínico","Creatina","Whey Leite","Whey Carne","3L Água"];
 
 const days = [
   {name:"Segunda", rest:true},
@@ -167,97 +129,114 @@ const days = [
     {p:"Tarde", t:[["Abdômen","abs"],["Academia","gym"]]},
     {p:"Noite", t:[["Corrida 5km","run"]]}
   ]},
-  {name:"Sexta", treino:[
-    {p:"Dia", t:[["Academia","gym"]]}
-  ]},
-  {name:"Sábado", intense:true, treino:[
+  {name:"Sexta", treino:[{p:"Dia", t:[["Academia","gym"]]}]},
+  {name:"Sábado", treino:[
     {p:"Manhã", t:[["Natação","swim"]]},
     {p:"Noite", t:[["Corrida 10km+","run"]]}
   ]},
-  {name:"Domingo", treino:[
-    {p:"Dia", t:[["Academia","gym"]]}
-  ]}
+  {name:"Domingo", treino:[{p:"Dia", t:[["Academia","gym"]]}]}
 ];
 
 const app = document.getElementById("app");
 
-function saveState(){
+function getWeek(){
+  const d = new Date();
+  const first = new Date(d.getFullYear(),0,1);
+  return Math.ceil((((d - first)/86400000)+first.getDay()+1)/7);
+}
+
+function resetIfNewWeek(){
+  const current = getWeek();
+  const saved = localStorage.getItem("week");
+
+  if(saved != current){
+    localStorage.removeItem("checks");
+    localStorage.setItem("week", current);
+  }
+}
+
+function save(){
   const data = {};
-  document.querySelectorAll("input").forEach(input=>{
-    data[input.id] = input.checked;
+  document.querySelectorAll("input").forEach(i=>{
+    data[i.id] = i.checked;
   });
-  localStorage.setItem("planner", JSON.stringify(data));
-  updateStats();
+  localStorage.setItem("checks", JSON.stringify(data));
+  update();
 }
 
-function loadState(){
-  const data = JSON.parse(localStorage.getItem("planner") || "{}");
-  document.querySelectorAll("input").forEach(input=>{
-    input.checked = data[input.id] || false;
+function load(){
+  const data = JSON.parse(localStorage.getItem("checks")||"{}");
+  document.querySelectorAll("input").forEach(i=>{
+    i.checked = data[i.id] || false;
   });
 }
 
-function updateStats(){
+function update(){
   const inputs = document.querySelectorAll("input");
   let total = inputs.length;
   let done = [...inputs].filter(i=>i.checked).length;
 
   let percent = Math.round((done/total)*100);
-  document.getElementById("progressBar").style.width = percent+"%";
-  document.getElementById("progressText").innerText = percent+"%";
+  document.getElementById("score").innerText = "Score: "+percent+"%";
+  document.getElementById("bar").style.width = percent+"%";
 
-  // streak simples
+  // histórico
+  let week = getWeek();
+  let history = JSON.parse(localStorage.getItem("history")||"{}");
+  history[week] = percent;
+  localStorage.setItem("history", JSON.stringify(history));
+
+  document.getElementById("history").innerText =
+    Object.entries(history).map(([w,v])=>`Sem ${w}: ${v}%`).join(" | ");
+
+  // streak
   let streak = 0;
-  days.forEach((d, i)=>{
-    let dayChecks = checklist.map((_,j)=>document.getElementById(`d${i}-${j}`));
-    if(dayChecks.every(c=>c.checked)) streak++;
+  days.forEach((d,i)=>{
+    let ok = checklist.every((_,j)=>{
+      let el = document.getElementById(`d${i}-${j}`);
+      return el && el.checked;
+    });
+    if(ok) streak++;
   });
 
   document.getElementById("streak").innerText = "🔥 Streak: "+streak;
 }
 
-days.forEach((d, i)=>{
-  const div = document.createElement("div");
-  div.className = "day" + (d.intense ? " intense":"");
+resetIfNewWeek();
 
-  let left = `<div class="left">
-    <h2>${d.name}
-      <span class="tag ${d.rest?"descanso":"treino"}">
-      ${d.rest?"Descanso":"Treino"}
-      </span>
-    </h2>`;
+days.forEach((d,i)=>{
+  let div = document.createElement("div");
+  div.className = "day";
 
+  let left = `<div class="left"><h3>${d.name}</h3>`;
   if(d.rest){
-    left += `<p style="color:#aaa">Recuperação</p>`;
+    left += `<p style="color:#aaa">Descanso</p>`;
   } else {
     d.treino.forEach(sec=>{
-      left += `<div>
-        <div class="label">${sec.p}</div>`;
+      left += `<div>${sec.p}: `;
       sec.t.forEach(t=>{
         left += `<span class="pill ${t[1]}">${t[0]}</span>`;
       });
       left += `</div>`;
     });
   }
+  left += "</div>";
 
-  left += `<div class="notes"><div></div><div></div></div></div>`;
-
-  let right = `<div class="right checklist">`;
-  checklist.forEach((item,j)=>{
-    right += `
-    <label>
-      <input type="checkbox" id="d${i}-${j}" onchange="saveState()">
-      ${item}
-    </label>`;
+  let right = `<div class="right">`;
+  checklist.forEach((c,j)=>{
+    right += `<label>
+      <input type="checkbox" id="d${i}-${j}" onchange="save()">
+      ${c}
+    </label><br>`;
   });
-  right += `</div>`;
+  right += "</div>";
 
   div.innerHTML = left + right;
   app.appendChild(div);
 });
 
-loadState();
-updateStats();
+load();
+update();
 
 </script>
 
