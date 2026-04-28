@@ -74,7 +74,6 @@ body{
   border:1px solid rgba(255,255,255,0.08);
   backdrop-filter: blur(10px);
   overflow:hidden;
-  position:relative;
 }
 
 .left{width:35%;padding:15px;}
@@ -149,7 +148,6 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  transition:.2s;
 }
 
 input:checked + .box{
@@ -167,16 +165,18 @@ input:checked + .box::after{
   border:1.5px solid #ff4500;
 }
 
-.intense::before{
-  content:"🔥 SÁBADO — DIA MAIS INTENSO";
-  position:absolute;
-  top:-10px;
-  left:15px;
-  background:#ff4500;
-  color:#fff;
-  font-size:11px;
-  padding:3px 10px;
+.intense .day{
+  color:#ff4500;
+}
+
+.intense-badge{
+  display:inline-block;
+  margin-top:6px;
+  padding:4px 10px;
+  border:1px solid #ff4500;
+  color:#ff4500;
   border-radius:20px;
+  font-size:11px;
   font-weight:600;
 }
 </style>
@@ -273,6 +273,10 @@ days.forEach((d,i)=>{
     <div class="day">${d.name}
       <span class="tag">${d.rest?"DESCANSO":"TREINO"}</span>
     </div>`;
+
+  if(d.intense){
+    left+=`<div class="intense-badge">🔥 DIA MAIS INTENSO</div>`;
+  }
 
   if(d.rest){
     left+=`<div class="desc">Recuperação e descanso ativo</div>`;
