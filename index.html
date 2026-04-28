@@ -17,51 +17,32 @@ body{
 .container{
   max-width:1100px;
   margin:auto;
-  padding:30px 20px;
+  padding:25px;
 }
-
-/* HEADER */
 
 .top{
   display:flex;
   justify-content:space-between;
-  align-items:flex-start;
-  margin-bottom:25px;
+  margin-bottom:20px;
 }
 
-.title small{
-  color:#888;
-  font-size:12px;
-}
-
-.title h1{
-  margin:0;
-  font-size:34px;
-}
+.title small{color:#888;font-size:12px;}
+.title h1{margin:0;font-size:32px;}
 
 .stats{
   display:flex;
-  gap:30px;
+  gap:20px;
   align-items:center;
 }
 
 .circle{
-  width:60px;
-  height:60px;
+  width:60px;height:60px;
   border-radius:50%;
   border:6px solid #1f1f1f;
-  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-
-.circle span{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-size:14px;
-}
-
-/* LEGEND */
 
 .legend{
   display:flex;
@@ -70,56 +51,46 @@ body{
   font-size:13px;
 }
 
-.legend span{
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-
 .dot{
-  width:10px;
-  height:10px;
-  border-radius:2px;
+  width:10px;height:10px;border-radius:2px;
 }
-
-/* CARD */
 
 .card{
   display:flex;
-  border-radius:20px;
+  border-radius:18px;
   margin-bottom:12px;
   background:linear-gradient(145deg,#1b1b1b,#0f0f0f);
   border:1px solid rgba(255,255,255,0.08);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
   overflow:hidden;
 }
 
-.left{width:35%; padding:18px;}
-.middle{width:35%; padding:18px; border-left:1px solid rgba(255,255,255,0.08);}
-.right{width:30%; padding:18px; border-left:1px dashed rgba(255,255,255,0.2);}
+.left{width:35%;padding:15px;}
+.middle{width:35%;padding:15px;border-left:1px solid rgba(255,255,255,0.08);}
+.right{width:30%;padding:15px;border-left:1px dashed rgba(255,255,255,0.2);}
 
 .day{
-  font-size:20px;
+  font-size:18px;
   font-weight:600;
 }
 
 .tag{
   background:#2c2c2c;
-  padding:4px 10px;
+  padding:3px 10px;
   border-radius:20px;
   font-size:11px;
-  margin-left:10px;
+  margin-left:8px;
 }
 
-.desc{color:#888; margin-top:8px; font-size:13px;}
+.desc{color:#888;font-size:13px;margin-top:6px;}
 
-.period{margin-top:10px; font-size:12px; color:#aaa;}
+.period{margin-top:8px;font-size:12px;color:#aaa;}
 
 .pill{
   display:inline-block;
-  padding:6px 12px;
+  padding:5px 10px;
   border-radius:20px;
-  margin-top:6px;
+  margin-top:4px;
   font-size:12px;
 }
 
@@ -131,30 +102,34 @@ body{
 .notes-title{
   font-size:12px;
   color:#aaa;
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
 
-.line{
-  height:1px;
-  background:#333;
-  margin-bottom:10px;
+.notes-input{
+  width:100%;
+  height:70px;
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#ccc;
+  border-top:1px solid #333;
+  padding-top:8px;
+  resize:none;
 }
-
-/* CHECK */
 
 .check{
   display:flex;
   align-items:center;
   gap:10px;
-  margin-bottom:10px;
+  margin-bottom:8px;
   font-size:13px;
+  cursor:pointer;
 }
 
 .check input{display:none;}
 
 .box{
-  width:18px;
-  height:18px;
+  width:18px;height:18px;
   border:2px solid #555;
   border-radius:4px;
   display:flex;
@@ -170,21 +145,11 @@ input:checked + .box{
 
 input:checked + .box::after{
   content:"✔";
-  color:#fff;
   font-size:12px;
 }
 
-/* SÁBADO */
-
-.intense{
-  border:2px solid #ff4500;
-}
-
-.banner{
-  background:#ff4500;
-  padding:6px 15px;
-  font-size:12px;
-  font-weight:600;
+.intense .day{
+  color:#ff4500;
 }
 </style>
 </head>
@@ -200,9 +165,8 @@ input:checked + .box::after{
   </div>
 
   <div class="stats">
-    <div class="circle"><span id="percent">0%</span></div>
-    <div>🔥 <span id="streak">0</span></div>
-    <div>📊 Histórico</div>
+    <div class="circle" id="percent">0%</div>
+    🔥 <span id="streak">0</span>
   </div>
 </div>
 
@@ -229,38 +193,39 @@ const checklist=[
 
 const days=[
   {name:"Segunda",rest:true},
-  {name:"Terça",treino:[
-    ["Manhã","Academia","gym"],
-    ["Tarde","Abdômen","abs"]
-  ]},
+  {name:"Terça",treino:[["Manhã","Academia","gym"],["Tarde","Abdômen","abs"]]},
   {name:"Quarta",rest:true},
-  {name:"Quinta",treino:[
-    ["Tarde","Abdômen","abs"],
-    ["Tarde","Academia","gym"],
-    ["Noite","Corrida 5km","run"]
-  ]},
-  {name:"Sexta",treino:[
-    ["Dia","Academia","gym"]
-  ]},
-  {name:"Sábado",intense:true,treino:[
-    ["Manhã","Natação","swim"],
-    ["Noite","Corrida longa +10km","run"]
-  ]},
-  {name:"Domingo",treino:[
-    ["Dia","Academia","gym"]
-  ]}
+  {name:"Quinta",treino:[["Tarde","Abdômen","abs"],["Tarde","Academia","gym"],["Noite","Corrida 5km","run"]]},
+  {name:"Sexta",treino:[["Dia","Academia","gym"]]},
+  {name:"Sábado",intense:true,treino:[["Manhã","Natação","swim"],["Noite","Corrida longa +10km","run"]]},
+  {name:"Domingo",treino:[["Dia","Academia","gym"]]}
 ];
 
 function save(){
   const data={};
-  document.querySelectorAll("input").forEach(i=>data[i.id]=i.checked);
+
+  document.querySelectorAll("input").forEach(i=>{
+    data[i.id]=i.checked;
+  });
+
+  document.querySelectorAll("textarea").forEach(t=>{
+    data[t.id]=t.value;
+  });
+
   localStorage.setItem("planner",JSON.stringify(data));
   update();
 }
 
 function load(){
   const data=JSON.parse(localStorage.getItem("planner")||"{}");
-  document.querySelectorAll("input").forEach(i=>i.checked=data[i.id]||false);
+
+  document.querySelectorAll("input").forEach(i=>{
+    i.checked=data[i.id]||false;
+  });
+
+  document.querySelectorAll("textarea").forEach(t=>{
+    t.value=data[t.id]||"";
+  });
 }
 
 function update(){
@@ -287,7 +252,7 @@ days.forEach((d,i)=>{
   card.className="card"+(d.intense?" intense":"");
 
   let left=`<div class="left">
-    <div class="day">${d.name} 
+    <div class="day">${d.name}
       <span class="tag">${d.rest?"DESCANSO":"TREINO"}</span>
     </div>`;
 
@@ -305,9 +270,7 @@ days.forEach((d,i)=>{
 
   let middle=`<div class="middle">
     <div class="notes-title">ANOTAÇÕES</div>
-    <div class="line"></div>
-    <div class="line"></div>
-    <div class="desc">Clique para adicionar</div>
+    <textarea class="notes-input" id="note-${i}" placeholder="Clique para adicionar" oninput="save()"></textarea>
   </div>`;
 
   let right=`<div class="right">`;
@@ -323,12 +286,7 @@ days.forEach((d,i)=>{
 
   right+="</div>";
 
-  if(d.intense){
-    card.innerHTML=`<div class="banner">🔥 SÁBADO — DIA MAIS INTENSO</div>`+left+middle+right;
-  }else{
-    card.innerHTML=left+middle+right;
-  }
-
+  card.innerHTML=left+middle+right;
   app.appendChild(card);
 });
 
