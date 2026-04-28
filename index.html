@@ -20,6 +20,7 @@ body{
   padding:25px;
 }
 
+/* HEADER */
 .top{
   display:flex;
   justify-content:space-between;
@@ -44,17 +45,27 @@ body{
   justify-content:center;
 }
 
+/* LEGEND */
 .legend{
   display:flex;
-  gap:15px;
+  gap:20px;
   margin-bottom:15px;
   font-size:13px;
+  flex-wrap:nowrap;
+}
+
+.legend span{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  white-space:nowrap;
 }
 
 .dot{
   width:10px;height:10px;border-radius:2px;
 }
 
+/* CARD */
 .card{
   display:flex;
   border-radius:18px;
@@ -63,6 +74,7 @@ body{
   border:1px solid rgba(255,255,255,0.08);
   backdrop-filter: blur(10px);
   overflow:hidden;
+  position:relative;
 }
 
 .left{width:35%;padding:15px;}
@@ -99,6 +111,7 @@ body{
 .run{background:#ffe9cc;color:#7a4d00;}
 .swim{background:#d9fff2;color:#00664d;}
 
+/* NOTES */
 .notes-title{
   font-size:12px;
   color:#aaa;
@@ -117,6 +130,7 @@ body{
   resize:none;
 }
 
+/* CHECK */
 .check{
   display:flex;
   align-items:center;
@@ -148,8 +162,22 @@ input:checked + .box::after{
   font-size:12px;
 }
 
-.intense .day{
-  color:#ff4500;
+/* 🔥 SÁBADO */
+.intense{
+  border:1.5px solid #ff4500;
+}
+
+.intense::before{
+  content:"🔥 SÁBADO — DIA MAIS INTENSO";
+  position:absolute;
+  top:-10px;
+  left:15px;
+  background:#ff4500;
+  color:#fff;
+  font-size:11px;
+  padding:3px 10px;
+  border-radius:20px;
+  font-weight:600;
 }
 </style>
 </head>
@@ -204,13 +232,8 @@ const days=[
 function save(){
   const data={};
 
-  document.querySelectorAll("input").forEach(i=>{
-    data[i.id]=i.checked;
-  });
-
-  document.querySelectorAll("textarea").forEach(t=>{
-    data[t.id]=t.value;
-  });
+  document.querySelectorAll("input").forEach(i=>data[i.id]=i.checked);
+  document.querySelectorAll("textarea").forEach(t=>data[t.id]=t.value);
 
   localStorage.setItem("planner",JSON.stringify(data));
   update();
@@ -219,13 +242,8 @@ function save(){
 function load(){
   const data=JSON.parse(localStorage.getItem("planner")||"{}");
 
-  document.querySelectorAll("input").forEach(i=>{
-    i.checked=data[i.id]||false;
-  });
-
-  document.querySelectorAll("textarea").forEach(t=>{
-    t.value=data[t.id]||"";
-  });
+  document.querySelectorAll("input").forEach(i=>i.checked=data[i.id]||false);
+  document.querySelectorAll("textarea").forEach(t=>t.value=data[t.id]||"");
 }
 
 function update(){
