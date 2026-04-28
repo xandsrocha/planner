@@ -8,7 +8,7 @@
 body{
   margin:0;
   background:#0b0b0b;
-  font-family:Arial;
+  font-family:'Segoe UI', sans-serif;
   color:#fff;
 }
 
@@ -26,63 +26,12 @@ body{
 }
 
 .stats{
-  font-size:14px;
+  font-size:13px;
   color:#aaa;
 }
 
-.history{
-  margin-top:10px;
-  font-size:12px;
-  color:#ccc;
-}
-
-.day{
-  display:flex;
-  flex-wrap:wrap;
-  border:1px solid #2a2a2a;
-  border-radius:12px;
-  margin-bottom:12px;
-  overflow:hidden;
-  background:#1a1a1a;
-}
-
-.left, .right{
-  padding:15px;
-  flex:1;
-  min-width:250px;
-}
-
-.right{
-  border-left:1px solid #2a2a2a;
-}
-
-.tag{
-  font-size:12px;
-  padding:4px 8px;
-  border-radius:20px;
-  margin-left:10px;
-}
-
-.treino{ background:#dff5d5; color:#1b4d12;}
-.descanso{ background:#333; color:#aaa;}
-
-.pill{
-  display:inline-block;
-  padding:5px 10px;
-  border-radius:20px;
-  font-size:12px;
-  margin:3px 5px 0 0;
-}
-
-.gym{ background:#dff5d5;}
-.abs{ background:#dbeeff;}
-.run{ background:#ffe9cc;}
-.swim{ background:#d9fff2;}
-
-input{ cursor:pointer; }
-
 .progress-bar{
-  height:8px;
+  height:6px;
   background:#333;
   border-radius:10px;
   overflow:hidden;
@@ -94,6 +43,71 @@ input{ cursor:pointer; }
   background:#4caf50;
   width:0%;
 }
+
+.day{
+  display:flex;
+  border:1px solid #2a2a2a;
+  border-radius:14px;
+  margin-bottom:12px;
+  overflow:hidden;
+  background:#1a1a1a;
+}
+
+.left{
+  padding:15px;
+  width:55%;
+}
+
+.right{
+  padding:15px;
+  width:45%;
+  border-left:1px solid #2a2a2a;
+}
+
+h2{
+  margin:0 0 10px;
+  font-size:18px;
+}
+
+.tag{
+  font-size:11px;
+  padding:3px 8px;
+  border-radius:20px;
+  margin-left:8px;
+}
+
+.treino{ background:#dff5d5; color:#1b4d12;}
+.descanso{ background:#333; color:#aaa;}
+
+.pill{
+  display:inline-block;
+  padding:5px 10px;
+  border-radius:20px;
+  font-size:11px;
+  margin:3px 5px 0 0;
+}
+
+.gym{ background:#dff5d5; color:#1b4d12;}
+.abs{ background:#dbeeff; color:#1b4d66;}
+.run{ background:#ffe9cc; color:#7a4d00;}
+.swim{ background:#d9fff2; color:#00664d;}
+
+.checklist label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:6px;
+  cursor:pointer;
+}
+
+input{
+  width:16px;
+  height:16px;
+}
+
+.intense{
+  border:2px solid #ff4500;
+}
 </style>
 </head>
 
@@ -103,10 +117,9 @@ input{ cursor:pointer; }
 <div class="header">
   <h1>Minha semana</h1>
   <div class="stats">
-    <div id="score">Score: 0%</div>
-    <div id="streak">🔥 Streak: 0</div>
+    <div id="score">0%</div>
+    <div id="streak">🔥 0</div>
     <div class="progress-bar"><div class="progress" id="bar"></div></div>
-    <div class="history" id="history"></div>
   </div>
 </div>
 
@@ -116,7 +129,13 @@ input{ cursor:pointer; }
 
 <script>
 
-const checklist = ["Multivitamínico","Creatina","Whey Leite","Whey Carne","3L Água"];
+const checklist = [
+"Multivitamínico",
+"Creatina",
+"Whey Leite",
+"Whey Carne",
+"3L Água"
+];
 
 const days = [
   {name:"Segunda", rest:true},
@@ -130,7 +149,7 @@ const days = [
     {p:"Noite", t:[["Corrida 5km","run"]]}
   ]},
   {name:"Sexta", treino:[{p:"Dia", t:[["Academia","gym"]]}]},
-  {name:"Sábado", treino:[
+  {name:"Sábado", intense:true, treino:[
     {p:"Manhã", t:[["Natação","swim"]]},
     {p:"Noite", t:[["Corrida 10km+","run"]]}
   ]},
@@ -139,33 +158,17 @@ const days = [
 
 const app = document.getElementById("app");
 
-function getWeek(){
-  const d = new Date();
-  const first = new Date(d.getFullYear(),0,1);
-  return Math.ceil((((d - first)/86400000)+first.getDay()+1)/7);
-}
-
-function resetIfNewWeek(){
-  const current = getWeek();
-  const saved = localStorage.getItem("week");
-
-  if(saved != current){
-    localStorage.removeItem("checks");
-    localStorage.setItem("week", current);
-  }
-}
-
 function save(){
   const data = {};
   document.querySelectorAll("input").forEach(i=>{
     data[i.id] = i.checked;
   });
-  localStorage.setItem("checks", JSON.stringify(data));
+  localStorage.setItem("planner", JSON.stringify(data));
   update();
 }
 
 function load(){
-  const data = JSON.parse(localStorage.getItem("checks")||"{}");
+  const data = JSON.parse(localStorage.getItem("planner")||"{}");
   document.querySelectorAll("input").forEach(i=>{
     i.checked = data[i.id] || false;
   });
@@ -177,19 +180,9 @@ function update(){
   let done = [...inputs].filter(i=>i.checked).length;
 
   let percent = Math.round((done/total)*100);
-  document.getElementById("score").innerText = "Score: "+percent+"%";
+  document.getElementById("score").innerText = percent+"%";
   document.getElementById("bar").style.width = percent+"%";
 
-  // histórico
-  let week = getWeek();
-  let history = JSON.parse(localStorage.getItem("history")||"{}");
-  history[week] = percent;
-  localStorage.setItem("history", JSON.stringify(history));
-
-  document.getElementById("history").innerText =
-    Object.entries(history).map(([w,v])=>`Sem ${w}: ${v}%`).join(" | ");
-
-  // streak
   let streak = 0;
   days.forEach((d,i)=>{
     let ok = checklist.every((_,j)=>{
@@ -199,35 +192,40 @@ function update(){
     if(ok) streak++;
   });
 
-  document.getElementById("streak").innerText = "🔥 Streak: "+streak;
+  document.getElementById("streak").innerText = "🔥 "+streak;
 }
 
-resetIfNewWeek();
-
 days.forEach((d,i)=>{
-  let div = document.createElement("div");
-  div.className = "day";
+  const div = document.createElement("div");
+  div.className = "day" + (d.intense ? " intense":"");
 
-  let left = `<div class="left"><h3>${d.name}</h3>`;
+  let left = `<div class="left">
+    <h2>${d.name}
+      <span class="tag ${d.rest?"descanso":"treino"}">
+        ${d.rest?"Descanso":"Treino"}
+      </span>
+    </h2>`;
+
   if(d.rest){
-    left += `<p style="color:#aaa">Descanso</p>`;
+    left += `<p style="color:#aaa">Recuperação</p>`;
   } else {
     d.treino.forEach(sec=>{
-      left += `<div>${sec.p}: `;
+      left += `<div><b>${sec.p}</b><br>`;
       sec.t.forEach(t=>{
         left += `<span class="pill ${t[1]}">${t[0]}</span>`;
       });
       left += `</div>`;
     });
   }
+
   left += "</div>";
 
-  let right = `<div class="right">`;
+  let right = `<div class="right checklist">`;
   checklist.forEach((c,j)=>{
     right += `<label>
       <input type="checkbox" id="d${i}-${j}" onchange="save()">
       ${c}
-    </label><br>`;
+    </label>`;
   });
   right += "</div>";
 
